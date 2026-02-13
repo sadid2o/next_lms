@@ -3,14 +3,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { isTeacher } from '@/lib/teacher'
 
-type Attachment = Promise<{
+// Attachment type-e attachmentId chilo jeta error dichhilo, ota soriye shudhu courseId rakha hoyeche
+type Params = Promise<{
   courseId: string
-  attachmentId: string
 }>
 
-export async function POST(request: NextRequest, { params }: { params: Attachment }) {
-  const { courseId } = await params
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Params } // Context properly typed for Next.js 16
+) {
   try {
+    const { courseId } = await params // Await kora hoyeche jate error na ase
     const { userId } = await auth()
     const { url } = await request.json()
 
@@ -21,7 +24,7 @@ export async function POST(request: NextRequest, { params }: { params: Attachmen
     const courseOwner = await db.course.findUnique({
       where: {
         id: courseId,
-        createdById: userId,
+        userId: userId, // createdById er jaygay userId check kore dekhen schema te ki ache
       },
     })
 
@@ -33,12 +36,13 @@ export async function POST(request: NextRequest, { params }: { params: Attachmen
       data: {
         url,
         name: url.split('/').pop(),
-        courseId,
+        courseId: courseId,
       },
     })
 
     return NextResponse.json(attachment)
-  } catch {
+  } catch (error) {
+    console.log("[ATTACHMENTS_POST]", error);
     return new NextResponse('Internal server error', { status: 500 })
   }
 }

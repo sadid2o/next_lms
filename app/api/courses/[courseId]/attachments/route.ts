@@ -3,17 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { isTeacher } from '@/lib/teacher'
 
-// Attachment type-e attachmentId chilo jeta error dichhilo, ota soriye shudhu courseId rakha hoyeche
 type Params = Promise<{
   courseId: string
 }>
 
 export async function POST(
   request: NextRequest, 
-  { params }: { params: Params } // Context properly typed for Next.js 16
+  { params }: { params: Params }
 ) {
   try {
-    const { courseId } = await params // Await kora hoyeche jate error na ase
+    const { courseId } = await params
     const { userId } = await auth()
     const { url } = await request.json()
 
@@ -21,10 +20,11 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
+    // Schema onujayi createdById use kora hoyeche
     const courseOwner = await db.course.findUnique({
       where: {
         id: courseId,
-        userId: userId, // createdById er jaygay userId check kore dekhen schema te ki ache
+        createdById: userId, // Schema-r 'createdById' field use kora holo
       },
     })
 
@@ -35,7 +35,7 @@ export async function POST(
     const attachment = await db.attachment.create({
       data: {
         url,
-        name: url.split('/').pop(),
+        name: url.split('/').pop() || "attachment",
         courseId: courseId,
       },
     })

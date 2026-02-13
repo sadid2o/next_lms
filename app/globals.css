@@ -1,9 +1,10 @@
-/* Ekebare upore thakte hobe */
-@import "~@uploadthing/react/styles.css";
+@import "@uploadthing/react/styles.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Baki shob CSS code niche thakbe... */
 
 html, 
 body, 
